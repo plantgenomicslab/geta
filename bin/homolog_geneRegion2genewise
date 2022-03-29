@@ -68,8 +68,11 @@ foreach (sort {$command{$b} <=> $command{$a}} keys %command) {
 	print COMMAND;
 }
 close COMMAND;
+system("sed -i 's/|/\\|/g; s/:/\\:/g' command.genewise.list &> command.genewise_sed.log") == 0 or die "failed to execute: $!\n";
 
-system("ParaFly -c command.genewise.list -CPU $ARGV[4] &> command.genewise.log") == 0 or die "failed to execute: $!\n";
+#system("ParaFly -c command.genewise.list -CPU $ARGV[4] &> command.genewise.log") == 0 or die "failed to execute: $!\n";
+system("/data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_cmds_GridRunner.pl --grid_conf /data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_conf/SLURM.geta.conf -c command.genewise.list &> command.genewise.log") == 0 or die "failed to execute: $!\n";
+
 
 unless (-e "FailedCommands") {
     foreach (@out) {

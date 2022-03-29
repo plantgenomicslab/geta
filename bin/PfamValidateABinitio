@@ -148,7 +148,9 @@ foreach my $gene_id (@id) {
 close FASTA;
 close CMD;
 
-my $cmdString = "ParaFly -c command.hmmscan.list -CPU $cpu > /dev/null";
+#my $cmdString = "ParaFly -c command.hmmscan.list -CPU $cpu > /dev/null";
+my $cmdString =  "/data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_cmds_GridRunner.pl --grid_conf /data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_conf/SLURM.geta.conf -c command.hmmscan.list > /dev/null";
+
 system ($cmdString) == 0 or die "Failed to execute: $cmdString\n$!";
 
 my %gene_ok;

@@ -97,8 +97,8 @@ open IN, $ARGV[1] or die "Can not open file $ARGV[1], $!\n";
 my (%seq, $seq_id);
 while (<IN>) {
     chomp;
-    if (m/^>(\S+)/) { $seq_id = $1; }
-    else { $seq{$seq_id} .= $_; }
+    if (m/^>(\S+)/) { $seq_id = $1;}
+    else { $seq{$seq_id} .= $_;  }
 }
 close IN;
 
@@ -141,9 +141,13 @@ foreach my $gene_id (sort keys %gff) {
 close OUT;
 
 # 对proteins序列进行BLAST分析
+my $cmdString_empty = "perl ~/scratch/bin/scripts/filter_empty.pl < $out_prefix.proteins.fasta  > $out_prefix.proteins.fasta_empty";
+my $cmdString_cp = "cp $out_prefix.proteins.fasta_empty $out_prefix.proteins.fasta";
 my $cmdString = "makeblastdb -in $out_prefix.proteins.fasta -dbtype prot -title $out_prefix -parse_seqids -out $out_prefix -logfile $out_prefix.makeblastdb.log";
 unless (-e "$out_prefix.makeblastdb.ok") {
     print STDERR (localtime) . " CMD: $cmdString\n";
+	system ($cmdString_empty) == 0 or die "Failed to execute: $cmdString $!\n";
+	system ($cmdString_cp) == 0 or die "Failed to execute: $cmdString $!\n";
     system ($cmdString) == 0 or die "Failed to execute: $cmdString $!\n";
     open OUT, ">", "$out_prefix.makeblastdb.ok"; close OUT;
 }

@@ -38,8 +38,10 @@ foreach (sort {$length{$b} <=> $length{$a}} keys %command) {
     print COM;
 }
 close COM;
+##won_fix
+#my $cmdString = "ParaFly -c command.blast.list -CPU $threads &> /dev/null";
+my $cmdString = "/data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_cmds_GridRunner.pl --grid_conf /data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_conf/SLURM.geta.conf -c command.blast.list";
 
-my $cmdString = "ParaFly -c command.blast.list -CPU $threads &> /dev/null";
 (system $cmdString) == 0 or die "Failed to excute: $cmdString\n";
 
 if ($outfmt == 5) { open OUT, '>', "$outPrefix.xml" or die $! }

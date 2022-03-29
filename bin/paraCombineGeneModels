@@ -139,7 +139,8 @@ foreach my $chr (sort keys %chr) {
 }
 close CMD;
 
-my $cmdString = "ParaFly -c command.combineGeneModels.list -CPU $cpu > /dev/null";
+#my $cmdString = "ParaFly -c command.combineGeneModels.list -CPU $cpu > /dev/null";
+my $cmdString = "/data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_cmds_GridRunner.pl --grid_conf /data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_conf/SLURM.geta_single.conf -c command.combineGeneModels.list > /dev/null";
 (system $cmdString) == 0 or die "Failed to execute: $cmdString\n";
 
 open OUT1, ">", "combine.1.gff3" or die $!;

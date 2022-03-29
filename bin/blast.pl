@@ -35,6 +35,7 @@ foreach my $seq_id (@seqID) {
 }
 
 system `ParaFly -c $outPrefix.command -CPU $threads`;
+system `/data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_cmds_GridRunner.pl --grid_conf /data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_conf/SLURM.geta.conf -c $outPrefix.command`
 
 unless ( -e "FailedCommands" ) {
     if ($outfmt == 5) { open OUT, '>', "$outPrefix.xml" or die $! }
