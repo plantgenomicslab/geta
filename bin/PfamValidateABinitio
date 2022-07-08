@@ -148,8 +148,10 @@ foreach my $gene_id (@id) {
 close FASTA;
 close CMD;
 
+my $geta_dir = abs_path(dirname(__FILE__));
+$geta_dir =~ s/\/bin$//;
 #my $cmdString = "ParaFly -c command.hmmscan.list -CPU $cpu > /dev/null";
-my $cmdString =  "/data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_cmds_GridRunner.pl --grid_conf /data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_conf/SLURM.geta.conf -c command.hmmscan.list > /dev/null";
+my $cmdString =  "hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.geta.conf -c command.hmmscan.list > /dev/null";
 
 system ($cmdString) == 0 or die "Failed to execute: $cmdString\n$!";
 

@@ -210,3 +210,9 @@ wget https://javadl.oracle.com/webapps/download/AutoDL?BundleId=244058_89d678f2b
 tar zxf ~/software/jre-8u281-linux-x64.tar.gz -C /opt/sysoft/
 echo 'PATH=/opt/sysoft/jre1.8.0_281/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
+
+## 12. Installing HPC Gridrunner
+wget https://github.com/HpcGridRunner/HpcGridRunner/archive/refs/tags/v1.0.2.tar.gz -O /opt/biosoft/HpcGR_v1.0.2.tar.gz
+tar zxf /opt/biosoft/HpcGR_v1.0.2.tar.gz -C /opt/biosoft/
+echo "PATH=$PATH:/opt/biosoft/HpcGridRunner-1.0.2/" >> ~/.bashrc
+source ~/.bashrc

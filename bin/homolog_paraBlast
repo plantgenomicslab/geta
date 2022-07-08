@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 use strict;
+use File::Basename;
+use Cwd 'abs_path';
 
 my $usage = <<USAGE;
 Usage:
@@ -38,9 +40,12 @@ foreach (sort {$length{$b} <=> $length{$a}} keys %command) {
     print COM;
 }
 close COM;
-##won_fix
+
+my $geta_dir = abs_path(dirname(__FILE__));
+$geta_dir =~ s/\/bin$//;
+
 #my $cmdString = "ParaFly -c command.blast.list -CPU $threads &> /dev/null";
-my $cmdString = "/data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_cmds_GridRunner.pl --grid_conf /data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_conf/SLURM.geta.conf -c command.blast.list";
+my $cmdString = "hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.geta.conf -c command.blast.list";
 
 (system $cmdString) == 0 or die "Failed to excute: $cmdString\n";
 

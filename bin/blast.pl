@@ -34,8 +34,10 @@ foreach my $seq_id (@seqID) {
     print COM "$program -query $outPrefix.tmp/$_.fa -db $db -evalue $evalue -num_threads 1 -outfmt $outfmt -out $outPrefix.tmp/$_.out\n";
 }
 
-system `ParaFly -c $outPrefix.command -CPU $threads`;
-system `/data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_cmds_GridRunner.pl --grid_conf /data/gpfs/home/wyim/scratch/bin/HpcGridRunner-1.0.2/hpc_conf/SLURM.geta.conf -c $outPrefix.command`
+my $geta_dir = abs_path(dirname(__FILE__));
+$geta_dir =~ s/\/bin$//;
+#system `ParaFly -c $outPrefix.command -CPU $threads`;
+system `hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.geta.conf -c $outPrefix.command`
 
 unless ( -e "FailedCommands" ) {
     if ($outfmt == 5) { open OUT, '>', "$outPrefix.xml" or die $! }

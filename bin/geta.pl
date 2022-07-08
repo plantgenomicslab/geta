@@ -561,7 +561,10 @@ unless (-e "3.transcript.ok") {
     close IN;
 
     # 批量并行化进行transcripts计算
-    $cmdString = "ParaFly -c command.sam2transfrag.list -CPU $cpu &> /dev/null";
+    my $geta_dir = abs_path(dirname(__FILE__));
+    $geta_dir =~ s/\/bin$//;
+    #$cmdString = "ParaFly -c command.sam2transfrag.list -CPU $cpu &> /dev/null";
+    $cmdString = "hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.geta.conf -c command.sam2transfrag.list &> /dev/null";
     print STDERR (localtime) . ": CMD: $cmdString\n";
     system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
 
