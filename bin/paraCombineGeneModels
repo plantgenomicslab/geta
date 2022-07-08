@@ -2,6 +2,7 @@
 use strict;
 use File::Basename;
 use Getopt::Long;
+use Cwd 'abs_path';
 
 my $usage = <<USAGE;
 Usage:
