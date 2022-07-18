@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 use strict;
 use Getopt::Long;
+use File::Basename;
+use Cwd 'abs_path';
 
 my $usage = <<USAGE;
 Usage:
@@ -92,7 +94,6 @@ while (<IN>) {
 }
 close IN;
 
-
 open IN, $ARGV[1] or die "Can not open file $ARGV[1], $!\n";
 my (%seq, $seq_id);
 while (<IN>) {
@@ -141,13 +142,14 @@ foreach my $gene_id (sort keys %gff) {
 close OUT;
 
 # 对proteins序列进行BLAST分析
-my $cmdString_empty = "perl ~/scratch/bin/scripts/filter_empty.pl < $out_prefix.proteins.fasta  > $out_prefix.proteins.fasta_empty";
+my $geta_dir = abs_path(dirname(__FILE__));
+my $cmdString_empty = "perl $geta_dir/filter_empty.pl < $out_prefix.proteins.fasta  > $out_prefix.proteins.fasta_empty";
 my $cmdString_cp = "cp $out_prefix.proteins.fasta_empty $out_prefix.proteins.fasta";
 my $cmdString = "makeblastdb -in $out_prefix.proteins.fasta -dbtype prot -title $out_prefix -parse_seqids -out $out_prefix -logfile $out_prefix.makeblastdb.log";
 unless (-e "$out_prefix.makeblastdb.ok") {
     print STDERR (localtime) . " CMD: $cmdString\n";
-	system ($cmdString_empty) == 0 or die "Failed to execute: $cmdString $!\n";
-	system ($cmdString_cp) == 0 or die "Failed to execute: $cmdString $!\n";
+	system ($cmdString_empty) == 0 or die "Failed to execute: $cmdString_empty $!\n";
+	system ($cmdString_cp) == 0 or die "Failed to execute: $cmdString_cp $!\n";
     system ($cmdString) == 0 or die "Failed to execute: $cmdString $!\n";
     open OUT, ">", "$out_prefix.makeblastdb.ok"; close OUT;
 }
