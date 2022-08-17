@@ -49,7 +49,7 @@ $CDS_num ||= 2;
 $cpu ||= 1;
 $evalue ||= 1e-5;
 $coverage ||= 0.25;
-$pfam_db ||= "/opt/biosoft/hmmer-3.1b2/Pfam-AB.hmm";
+$pfam_db ||= "/usr/local/bin/hmmer-3.3.2/Pfam-AB.hmm";
 
 open IN, $ARGV[0] or die $!;
 my (%gff, $id, @id, %id);
