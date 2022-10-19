@@ -12,23 +12,22 @@ USAGE
 if (@ARGV != 2){die $usage}
 
 my ($evalue, $threads) = @ARGV;
+my (@command, @outs);
 
 open IN, "proteinFasta.list" or die $!;
-my %command;
-my @outs;
 while (<IN>) {
 	chomp;
 	my $prot_db = $_ =~ s/homolog_protein.split\///gr;
-	my $aln_tmp = $prot_db + "_tmpDir";
-	my $aln_db = $prot_db + "_aln";
-	my $outfile = $prot_db + ".out";
-	$command{"mmseqs search $prot_db genome $aln_db $aln_tmp -e $evalue --threads $threads --start-sens 1 -s 8.5 -a --comp-bias-corr 0 --max-seqs 20 --mask 0 --orf-start-mode 1  --alignment-mode 3 && mmseqs convertalis $prot_db genome $aln_db $outfile"} = 1;
+	my $aln_tmp = $prot_db."_tmpDir";
+	my $aln_db = $prot_db."_aln";
+	my $outfile = $prot_db.".out";
+	push @command, "mmseqs search $prot_db genome $aln_db $aln_tmp -e $evalue --threads $threads --start-sens 1 -s 8.5 -a --comp-bias-corr 0 --max-seqs 20 --mask 0 --orf-start-mode 1  --alignment-mode 3 && mmseqs convertalis $prot_db genome $aln_db $outfile\n";
 	push @outs, $outfile;
 }
 close IN;
 
 open COM, '>', "command.blast.list" or die $!;
-foreach (sort {$length{$b} <=> $length{$a}} keys %command) {
+foreach (@command) {
     print COM;
 }
 close COM;
@@ -39,7 +38,7 @@ $geta_dir =~ s/\/bin$//;
 my $cmdString = "hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.mmseqs.conf -c command.blast.list";
 (system $cmdString) == 0 or die "Failed to excute: $cmdString\n";
 
-open OUT, '>', "out.tab" or die $!
+open OUT, '>', "out.tab" or die $!;
 
 foreach (@outs) {
     open IN, "$_" or die $!;

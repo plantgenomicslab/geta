@@ -26,6 +26,7 @@ my (%protein_length, $protein_ID);
 while (<IN>) {
     chomp;
     if (/^>[a-zA-Z]{2}\|(\S+)\|/) { $protein_ID = $1; }
+    elsif (/^>(\S+)/) { $protein_ID = $1; }
     else { $protein_length{$protein_ID} += length $_; }
 }
 close IN;

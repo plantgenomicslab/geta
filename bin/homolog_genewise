@@ -120,28 +120,28 @@ else {
 #}
 my $cmdString = "seqkit split -p 3 -j $cpu --quiet $homologProteinFastaFile -O homolog_protein.split";
 unless (-e "homolog_protein.split") {
-    print "CMD1/4.1: $cmdString"
+    print "CMD1/4.1: $cmdString\n";
     system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
-    print "1.1 Sucessfully split $homologProteinFastaFile";
+    print "1.1 Sucessfully split $homologProteinFastaFile\n";
 } else {
     print "1.1 Skipped splitting, homolog_protein.split exists\n";
 }
 
-my $cmdString = "for query in homolog_protein.split/*; do bn=$(basename \${query} '.fasta'); mmseqs createdb  \$query \$bn 1>> homolog_protein_db.log 2>&1; echo \$bn >> proteinFasta.list; mmseqs createindex \$bn \${bn}_index 1>> homolog_protein_db.log 2>&1; done";
+my $cmdString = "for query in homolog_protein.split/*; do bn=\$(basename \${query} '.fasta'); mmseqs createdb  \$query \$bn 1>> homolog_protein_db.log 2>&1; echo \$bn >> proteinFasta.list; mmseqs createindex \$bn \${bn}_index 1>> homolog_protein_db.log 2>&1; done";
 unless (-e "makeblastdb.ok") {
-    print "CMD1/4.2: $cmdString";
+    print "CMD1/4.2: $cmdString\n";
     system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
-    print "1.2 Sucessfully created databases for $homologProteinFastaFile";
+    print "1.2 Sucessfully created databases for $homologProteinFastaFile\n";
 } else {
     print "1.2 Skipped database creation for $homologProteinFastaFile. makeblastdb.ok exests\n";
 }
 
 my $cmdString = "mmseqs createdb  genome.splitting_and_joining.fasta genome 1>> genome_db.log 2>&1 && mmseqs createindex genome genome_index --search-type 2 1>> genome_db.log 2>&1";
 unless (-e "makeblastdb.ok") {
-    print "CMD 1/4.3: $cmdString";
+    print "CMD 1/4.3: $cmdString\n";
     system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
     open OUT, ">", "makeblastdb.ok" or die $!; close OUT;
-    print "1.2 Sucessfully created databases for genome.splitting_and_joining.fasta";
+    print "1.2 Sucessfully created databases for genome.splitting_and_joining.fasta\n";
 } else {
     print "1.3 Skipped database creation for genome.splitting_and_joining.fasta. makeblastdb.ok exests\n";
 }
