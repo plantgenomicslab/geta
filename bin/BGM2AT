@@ -73,12 +73,12 @@ $flanking_length = $gene_length[@gene_length/2] unless $flanking_length;
 print STDERR "the median gene length is $gene_length[@gene_length/2], the flanking length was set to $flanking_length\n";
 
 # 将GFF3转换成GeneBank格式
-my $cmdString = "gff2gbSmallDNA.pl $ARGV[0] $ARGV[1] $flanking_length genes.raw.gb &> gff2gbSmallDNA.raw.log";
+my $cmdString = "gff2gbSmallDNA.pl $ARGV[0] $ARGV[1] $flanking_length genes.raw.gb 1> gff2gbSmallDNA.raw.log 2>&1";
 print STDERR "CMD: $cmdString\n";
 (system $cmdString) == 0 or die "Failed to execute: $cmdString\n";
 
 if ($onlytrain_GFF3) {
-    $cmdString = "gff2gbSmallDNA.pl $onlytrain_GFF3 $ARGV[1] $flanking_length genes.all.gb &> gff2gbSmallDNA.all.log";
+    $cmdString = "gff2gbSmallDNA.pl $onlytrain_GFF3 $ARGV[1] $flanking_length genes.all.gb 1> gff2gbSmallDNA.all.log 2>&1";
     print STDERR "CMD: $cmdString\n";
     (system $cmdString) == 0 or die "Failed to execute: $cmdString\n";
 }
@@ -92,7 +92,7 @@ if (-e $for_bad_genes_removing) {
     print STDERR "CMD: $cmdString\n";
     (system $cmdString) == 0 or die "Failed to execute: $cmdString\n";
 }
-$cmdString = "new_species.pl --species=for_bad_genes_removing_$$ &> new_species.1.log";
+$cmdString = "new_species.pl --species=for_bad_genes_removing_$$ 1> new_species.1.log 2>&1";
 print STDERR "CMD: $cmdString\n";
 (system $cmdString) == 0 or die "Failed to execute: $cmdString\n";
 $cmdString = "etraining --species=for_bad_genes_removing_$$ --stopCodonExcludedFromCDS=false genes.raw.gb 1>etraining.out0 2> etraining.err0";
@@ -158,7 +158,7 @@ $species_config_dir = "$species_config_dir/species/$ARGV[2]";
 #print STDERR "CMD: $cmdString\n";
 #(system $cmdString) == 0 or die "Failed to execute: $cmdString\n";
 unless (-e $species_config_dir) {
-    $cmdString = "new_species.pl --species=$ARGV[2] &> new_species.2.log";
+    $cmdString = "new_species.pl --species=$ARGV[2] 1> new_species.2.log 2>&1";
     print STDERR "CMD: $cmdString\n";
     (system $cmdString) == 0 or die "Failed to execute: $cmdString\n";
 }

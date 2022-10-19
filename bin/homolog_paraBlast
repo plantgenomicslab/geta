@@ -44,7 +44,7 @@ close COM;
 my $geta_dir = abs_path(dirname(__FILE__));
 $geta_dir =~ s/\/bin$//;
 
-#my $cmdString = "ParaFly -c command.blast.list -CPU $threads &> /dev/null";
+#my $cmdString = "ParaFly -c command.blast.list -CPU $threads 1> /dev/null";
 my $cmdString = "hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.geta.conf -c command.blast.list";
 
 (system $cmdString) == 0 or die "Failed to excute: $cmdString\n";

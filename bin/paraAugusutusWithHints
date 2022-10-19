@@ -181,8 +181,8 @@ close COM;
 
 my $geta_dir = abs_path(dirname(__FILE__));
 $geta_dir =~ s/\/bin$//;
-#my $cmdString = "ParaFly -c command.augustus.list -CPU $cpu &> command.augustus.log";
-my $cmdString = "hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.geta_single.conf -c command.augustus.list  &> command.augustus.log ";
+#my $cmdString = "ParaFly -c command.augustus.list -CPU $cpu 1> command.augustus.log";
+my $cmdString = "hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.geta_single.conf -c command.augustus.list  1> command.augustus.log 2>&1";
 system ($cmdString) == 0 or die "Failed to execute: $cmdString\n$!\n";
 
 my (%out, $info, %hints_supporting_ratio, %intron_supporting_info);

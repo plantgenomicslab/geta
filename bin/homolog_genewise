@@ -108,23 +108,53 @@ else {
     print STDERR "The splitted and joined genome file genome.splitting_and_joining.fasta was existsed and used again\n";
 }
 
-my $cmdString = "makeblastdb -in genome.splitting_and_joining.fasta -dbtype nucl -title genome -parse_seqids -out genome &> makeblastdb.log";
-print "CMD 1/4: $cmdString\n";
-unless (-e "makeblastdb.ok") {
+#my $cmdString = "makeblastdb -in genome.splitting_and_joining.fasta -dbtype nucl -title genome -parse_seqids -out genome 1> makeblastdb.log 2>&1";
+#print "CMD 1/4: $cmdString\n";
+#unless (-e "makeblastdb.ok") {
+#    system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
+#    open OUT, ">", "makeblastdb.ok" or die $!; close OUT;
+#    print "1. Successfully Make Blast Database of genome.splitting_and_joining.fasta\n\n";
+#}
+#else {
+#    print "1. Skip CMD 1/4 for file makeblastdb.ok exists\n\n";
+#}
+my $cmdString = "seqkit split -p 3 -j $cpu --quiet $homologProteinFastaFile -O homolog_protein.split";
+unless (-e "homolog_protein.split") {
+    print "CMD1/4.1: $cmdString"
     system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
-    open OUT, ">", "makeblastdb.ok" or die $!; close OUT;
-    print "1. Successfully Make Blast Database of genome.splitting_and_joining.fasta\n\n";
-}
-else {
-    print "1. Skip CMD 1/4 for file makeblastdb.ok exists\n\n";
+    print "1.1 Sucessfully split $homologProteinFastaFile";
+} else {
+    print "1.1 Skipped splitting, homolog_protein.split exists\n";
 }
 
-$cmdString = "$path/homolog_paraBlast tblastn genome $homologProteinFastaFile 1e-5 $cpu out 6";
+my $cmdString = "for query in homolog_protein.split/*; do bn=$(basename \${query} '.fasta'); mmseqs createdb  \$query \$bn 1>> homolog_protein_db.log 2>&1; echo \$bn >> proteinFasta.list; mmseqs createindex \$bn \${bn}_index 1>> homolog_protein_db.log 2>&1; done";
+unless (-e "makeblastdb.ok") {
+    print "CMD1/4.2: $cmdString";
+    system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
+    print "1.2 Sucessfully created databases for $homologProteinFastaFile";
+} else {
+    print "1.2 Skipped database creation for $homologProteinFastaFile. makeblastdb.ok exests\n";
+}
+
+my $cmdString = "mmseqs createdb  genome.splitting_and_joining.fasta genome 1>> genome_db.log 2>&1 && mmseqs createindex genome genome_index --search-type 2 1>> genome_db.log 2>&1";
+unless (-e "makeblastdb.ok") {
+    print "CMD 1/4.3: $cmdString";
+    system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
+    open OUT, ">", "makeblastdb.ok" or die $!; close OUT;
+    print "1.2 Sucessfully created databases for genome.splitting_and_joining.fasta";
+} else {
+    print "1.3 Skipped database creation for genome.splitting_and_joining.fasta. makeblastdb.ok exests\n";
+}
+
+#$cmdString = "$path/homolog_paraBlast tblastn genome $homologProteinFastaFile 1e-5 $cpu out 6";
+$cmdString = "$path/homolog_MMSeqs 1e-5 $cpu";
 print "CMD 2/4: $cmdString\n";
 unless (-e "blast.ok") {
-    unlink "FailedCommands" if -e "FailedCommands";
+    #unlink "FailedCommands" if -e "FailedCommands";
+    unlink "command.blast.list.hpc-cache_success.__failures" if -e "command.blast.list.hpc-cache_success.__failures";
     system("$cmdString") == 0 or die "failed to execute: $!\n";
-    if ( -e "FailedCommands" ) { die "failed to execute: $cmdString\n"; }
+    #if ( -e "FailedCommands" ) { die "failed to execute: $cmdString\n"; }
+    if ( -e "command.blast.list.hpc-cache_success.__failures" ) { die "failed to execute: $cmdString\n"; }
 
     open IN, "out.tab" or die "Can not open file out.tab, $!\n";
     open OUT, ">", "out.correct.tab" or die "Can not create file out.correct.tab, $!\n";

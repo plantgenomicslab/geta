@@ -70,12 +70,12 @@ foreach (sort {$command{$b} <=> $command{$a}} keys %command) {
 	print COMMAND;
 }
 close COMMAND;
-system("sed -i 's/|/\\|/g; s/:/\\:/g' command.genewise.list &> command.genewise_sed.log") == 0 or die "failed to execute: $!\n";
+system("sed -i 's/|/\\|/g; s/:/\\:/g' command.genewise.list 1> command.genewise_sed.log 2>&1") == 0 or die "failed to execute: $!\n";
 
 my $geta_dir = abs_path(dirname(__FILE__));
 $geta_dir =~ s/\/bin$//;
-#system("ParaFly -c command.genewise.list -CPU $ARGV[4] &> command.genewise.log") == 0 or die "failed to execute: $!\n";
-system("hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.geta.conf -c command.genewise.list &> command.genewise.log") == 0 or die "failed to execute: $!\n";
+#system("ParaFly -c command.genewise.list -CPU $ARGV[4] 1> command.genewise.log") == 0 or die "failed to execute: $!\n";
+system("hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.geta.conf -c command.genewise.list 1> command.genewise.log 2>&1") == 0 or die "failed to execute: $!\n";
 
 
 unless (-e "FailedCommands") {

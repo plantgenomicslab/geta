@@ -336,7 +336,7 @@ unless (-e "0.RepeatMasker.ok") {
     # 进行RepeatMasker分析
     mkdir "repeatMasker" unless -e "repeatMasker";
     my $cpu_RepeatMasker = int($cpu / 4);
-    $cmdString = "RepeatMasker $config{'RepeatMasker'} -pa $cpu_RepeatMasker -species $RM_species -dir repeatMasker/ $genome &> repeatmasker.log";
+    $cmdString = "RepeatMasker $config{'RepeatMasker'} -pa $cpu_RepeatMasker -species $RM_species -dir repeatMasker/ $genome 1> repeatmasker.log 2>&1";
     unless (-e "RepeatMasker.ok") {
         print STDERR (localtime) . ": CMD: $cmdString\n";
         system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
@@ -361,7 +361,7 @@ unless (-e "0.RepeatMasker.ok") {
             print STDERR "CMD(Skipped): $cmdString\n";
         }
     my $cpu_RepeatModeler = int($cpu / 4);
-        $cmdString = "RepeatModeler -pa $cpu_RepeatModeler -database species -LTRStruct &> RepeatModeler.log";
+        $cmdString = "RepeatModeler -pa $cpu_RepeatModeler -database species -LTRStruct 1> RepeatModeler.log 2>&1";
         unless (-e "RepeatModeler.ok") {
             print STDERR (localtime) . ": CMD: $cmdString\n";
             system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
@@ -370,10 +370,10 @@ unless (-e "0.RepeatMasker.ok") {
         else {
             print STDERR "CMD(Skipped): $cmdString\n";
         }
-        $cmdString = "RepeatMasker $config{'RepeatMasker'} -pa $cpu -lib RM_\*/\*.classified -dir ./ $genome &> repeatmasker.log";
+        $cmdString = "RepeatMasker $config{'RepeatMasker'} -pa $cpu -lib RM_\*/\*.classified -dir ./ $genome 1> repeatmasker.log 2>&1";
     }
     else {
-        $cmdString = "RepeatMasker $config{'RepeatMasker'} -pa $cpu -lib $RM_lib -dir ./ $genome &> repeatmasker.log";
+        $cmdString = "RepeatMasker $config{'RepeatMasker'} -pa $cpu -lib $RM_lib -dir ./ $genome 1> repeatmasker.log 2>&1";
     }
     unless (-e "RepeatMasker.ok") {
         print STDERR (localtime) . ": CMD: $cmdString\n";
@@ -418,7 +418,7 @@ unless (-e "1.trimmomatic.ok") {
             $number ++;
             my $code = "0" x ( length($pe_reads_num) - length($number) ) . $number;
             @_ = split /\t/;
-            $cmdString = "java -jar $dirname/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads $cpu $_[0] $_[1] reads$code.1.fastq reads$code.1.unpaired.fastq reads$code.2.fastq reads$code.2.unpaired.fastq ILLUMINACLIP:$dirname/Trimmomatic-0.38/adapters/$config{'trimmomatic'} &> trimmomatic.pe.log";
+            $cmdString = "java -jar $dirname/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads $cpu $_[0] $_[1] reads$code.1.fastq reads$code.1.unpaired.fastq reads$code.2.fastq reads$code.2.unpaired.fastq ILLUMINACLIP:$dirname/Trimmomatic-0.38/adapters/$config{'trimmomatic'} 1> trimmomatic.pe.log 2>&1";
             print STDERR (localtime) . ": CMD: $cmdString\n";
             system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
         }
@@ -441,7 +441,7 @@ unless (-e "1.trimmomatic.ok") {
             $number ++;
             my $code = "0" x ( length($se_reads_num) - length($number) ) . $number;
             @_ = split /\t/;
-            $cmdString = "java -jar $dirname/Trimmomatic-0.38/trimmomatic-0.38.jar SE -threads $cpu $single_end reads$code.fastq ILLUMINACLIP:$dirname/Trimmomatic-0.38/adapters/$config{'trimmomatic'} &> trimmomatic.single.log";
+            $cmdString = "java -jar $dirname/Trimmomatic-0.38/trimmomatic-0.38.jar SE -threads $cpu $single_end reads$code.fastq ILLUMINACLIP:$dirname/Trimmomatic-0.38/adapters/$config{'trimmomatic'} 1> trimmomatic.single.log 2>&1";
             print STDERR (localtime) . ": CMD: $cmdString\n";
             system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
         }
@@ -475,7 +475,7 @@ unless (-e "2.hisat2.ok") {
     $pwd = `pwd`; print STDERR "PWD: $pwd";
 
     # 构建基因组hisat2索引数据库
-    $cmdString = "hisat2-build $config{'hisat2-build'} ../0.RepeatMasker/genome.masked.fasta genome &> hisat2-build.log\n";
+    $cmdString = "hisat2-build $config{'hisat2-build'} ../0.RepeatMasker/genome.masked.fasta genome 1> hisat2-build.log 2>&1\n";
     unless (-e "hisat2-build.ok") {
         print STDERR (localtime) . ": CMD: $cmdString\n";
         system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
@@ -564,8 +564,8 @@ unless (-e "3.transcript.ok") {
     # 批量并行化进行transcripts计算
     my $geta_dir = abs_path(dirname(__FILE__));
     $geta_dir =~ s/\/bin$//;
-    #$cmdString = "ParaFly -c command.sam2transfrag.list -CPU $cpu &> /dev/null";
-    $cmdString = "hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.geta.conf -c command.sam2transfrag.list &> /dev/null";
+    #$cmdString = "ParaFly -c command.sam2transfrag.list -CPU $cpu 1> /dev/null 2>&1";
+    $cmdString = "hpc_cmds_GridRunner.pl --grid_conf $geta_dir/SLURM.geta.conf -c command.sam2transfrag.list 1> /dev/null 2>&1";
     print STDERR (localtime) . ": CMD: $cmdString\n";
     system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
 
@@ -600,20 +600,20 @@ unless (-e "3.transcript.ok") {
 
     # 对transcripts序列使用Transdecoder进行ORF分析
     unless (-e "TransDecoder.ok") {
-        $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.LongOrfs $config{'TransDecoder.LongOrfs'} -t transfrag.strand.fasta -S &> /dev/null";
+        $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.LongOrfs $config{'TransDecoder.LongOrfs'} -t transfrag.strand.fasta -S 1> /dev/null 2>&1";
         print STDERR (localtime) . ": CMD: $cmdString\n";
         system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
-        $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.Predict $config{'TransDecoder.Predict'}  -t transfrag.strand.fasta &> /dev/null";
+        $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.Predict $config{'TransDecoder.Predict'}  -t transfrag.strand.fasta 1> /dev/null 2>&1";
         print STDERR (localtime) . ": CMD: $cmdString\n";
         system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
         $cmdString = "cp transfrag.strand.fasta.transdecoder.gff3 transfrag.transdecoder.gff3";
         print STDERR (localtime) . ": CMD: $cmdString\n";
         system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
         unless ($strand_specific) {
-            $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.LongOrfs $config{'TransDecoder.LongOrfs'} -t transfrag.noStrand.fasta &> /dev/null";
+            $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.LongOrfs $config{'TransDecoder.LongOrfs'} -t transfrag.noStrand.fasta 1> /dev/null 2>&1";
             print STDERR (localtime) . ": CMD: $cmdString\n";
             system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
-            $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.Predict $config{'TransDecoder.Predict'} -t transfrag.noStrand.fasta --train transfrag.strand.fasta.transdecoder_dir/longest_orfs.cds.top_500_longest &> /dev/null";
+            $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.Predict $config{'TransDecoder.Predict'} -t transfrag.noStrand.fasta --train transfrag.strand.fasta.transdecoder_dir/longest_orfs.cds.top_500_longest 1> /dev/null 2>&1";
             print STDERR (localtime) . ": CMD: $cmdString\n";
             system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
             $cmdString = "cat transfrag.noStrand.fasta.transdecoder.gff3 >> transfrag.transdecoder.gff3";
@@ -623,16 +623,16 @@ unless (-e "3.transcript.ok") {
         open OUT, ">", "TransDecoder.ok" or die $!; close OUT;
     }
     else {
-        $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.LongOrfs $config{'TransDecoder.LongOrfs'} -t transfrag.strand.fasta -S &> /dev/null";
+        $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.LongOrfs $config{'TransDecoder.LongOrfs'} -t transfrag.strand.fasta -S 1> /dev/null 2>&1";
         print STDERR "CMD(Skipped): $cmdString\n";
-        $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.Predict $config{'TransDecoder.Predict'} -t transfrag.strand.fasta &> /dev/null";
+        $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.Predict $config{'TransDecoder.Predict'} -t transfrag.strand.fasta 1> /dev/null 2>&1";
         print STDERR "CMD(Skipped): $cmdString\n";
         $cmdString = "cp transfrag.strand.fasta.transdecoder.gff3 transfrag.transdecoder.gff3";
         print STDERR "CMD(Skipped): $cmdString\n";
         unless ($strand_specific) {
-            $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.LongOrfs $config{'TransDecoder.LongOrfs'} -t transfrag.noStrand.fasta &> /dev/null";
+            $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.LongOrfs $config{'TransDecoder.LongOrfs'} -t transfrag.noStrand.fasta 1> /dev/null 2>&1";
             print STDERR "CMD(Skipped): $cmdString\n";
-            $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.Predict $config{'TransDecoder.Predict'} -t transfrag.noStrand.fasta --train transfrag.strand.fasta.transdecoder_dir/longest_orfs.cds.top_500_longest &> /dev/null";
+            $cmdString = "$dirname/TransDecoder-v5.5.0/TransDecoder.Predict $config{'TransDecoder.Predict'} -t transfrag.noStrand.fasta --train transfrag.strand.fasta.transdecoder_dir/longest_orfs.cds.top_500_longest 1> /dev/null 2>&1";
             print STDERR "CMD(Skipped): $cmdString\n";
             $cmdString = "cat transfrag.noStrand.fasta.transdecoder.gff3 >> transfrag.transdecoder.gff3";
             print STDERR "CMD(Skipped): $cmdString\n";
@@ -730,7 +730,7 @@ unless (-e "4.homolog.ok") {
         $overlapSize = int(($overlapSize / (10 ** $overlapSize_length)) + 1) * (10 ** $overlapSize_length);
         $segmentSize = $overlapSize * 10;
     }
-    $cmdString = "$dirname/bin/homolog_genewise --cpu $cpu --max_gene_length $max_gene_length --segmentSize $segmentSize --overlapSize $overlapSize $config{'homolog_genewise'} $protein ../0.RepeatMasker/genome.masked.fasta &> homolog_genewise.log";
+    $cmdString = "$dirname/bin/homolog_genewise --cpu $cpu --max_gene_length $max_gene_length --segmentSize $segmentSize --overlapSize $overlapSize $config{'homolog_genewise'} $protein ../0.RepeatMasker/genome.masked.fasta 1> homolog_genewise.log 2>&1";
     unless (-e "homolog_genewise.ok") {
         print STDERR (localtime) . ": CMD: $cmdString\n";
         system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
@@ -801,7 +801,7 @@ unless (-e "5.augustus.ok") {
         print STDERR (localtime) . ": CMD: $cmdString\n";
         system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
 
-        $cmdString = "$dirname/bin/geneModels2AugusutsTrainingInput $config{'geneModels2AugusutsTrainingInput'} --out_prefix ati --cpu $cpu geneModels.gff3 $genome &> geneModels2AugusutsTrainingInput.log";
+        $cmdString = "$dirname/bin/geneModels2AugusutsTrainingInput $config{'geneModels2AugusutsTrainingInput'} --out_prefix ati --cpu $cpu geneModels.gff3 $genome 1> geneModels2AugusutsTrainingInput.log 2>&1";
         unless (-e "geneModels2AugusutsTrainingInput.ok") {
             print STDERR (localtime) . ": CMD: $cmdString\n";
             system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
@@ -813,7 +813,7 @@ unless (-e "5.augustus.ok") {
                 $training_genes_number = $1 if m/Best gene Models number:\s+(\d+)/;
             }
             if ( $training_genes_number < 1000 ) {
-                $cmdString = "$dirname/bin/geneModels2AugusutsTrainingInput --min_evalue 1e-9 --min_identity 0.9 --min_coverage_ratio 0.9 --min_cds_num 1 --min_cds_length 450 --min_cds_exon_ratio 0.40 --keep_ratio_for_excluding_too_long_gene 0.99 --out_prefix ati --cpu $cpu geneModels.gff3 $genome &> geneModels2AugusutsTrainingInput.log.Loose_thresholds";
+                $cmdString = "$dirname/bin/geneModels2AugusutsTrainingInput --min_evalue 1e-9 --min_identity 0.9 --min_coverage_ratio 0.9 --min_cds_num 1 --min_cds_length 450 --min_cds_exon_ratio 0.40 --keep_ratio_for_excluding_too_long_gene 0.99 --out_prefix ati --cpu $cpu geneModels.gff3 $genome 1> geneModels2AugusutsTrainingInput.log.Loose_thresholds 2>&1";
                 print STDERR (localtime) . ": CMD: $cmdString\n";
                 system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
             }
@@ -853,7 +853,7 @@ unless (-e "5.augustus.ok") {
         @flanking_length = sort {$a <=> $b} @flanking_length;
         $flanking_length = int($flanking_length[@flanking_length/2] / 8);
         $flanking_length = $gene_length[@gene_length/2] if $flanking_length >= $gene_length[@gene_length/2];
-        $cmdString = "$dirname/bin/BGM2AT $config{'BGM2AT'} --flanking_length $flanking_length --CPU $cpu --onlytrain_GFF3 ati.filter1.gff3 ati.filter2.gff3 $genome $augustus_species &> BGM2AT.log";
+        $cmdString = "$dirname/bin/BGM2AT $config{'BGM2AT'} --flanking_length $flanking_length --CPU $cpu --onlytrain_GFF3 ati.filter1.gff3 ati.filter2.gff3 $genome $augustus_species 1> BGM2AT.log 2>&1";
         print STDERR (localtime) . ": CMD: $cmdString\n";
         system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
 
@@ -982,7 +982,7 @@ unless (-e "5.augustus.ok") {
             close OUT;
             print STDERR "Total genes predicted by Augustus: $total_num\nGood genes picked for next traning: $keep_num\n";
 
-            $cmdString = "$dirname/bin/geneModels2AugusutsTrainingInput --out_prefix ati --cpu $cpu $config{'geneModels2AugusutsTrainingInput'} geneModels.gff3 $genome &> geneModels2AugusutsTrainingInput.log";
+            $cmdString = "$dirname/bin/geneModels2AugusutsTrainingInput --out_prefix ati --cpu $cpu $config{'geneModels2AugusutsTrainingInput'} geneModels.gff3 $genome 1> geneModels2AugusutsTrainingInput.log 2>&1";
             unless (-e "geneModels2AugusutsTrainingInput.ok") {
                 print STDERR (localtime) . ": CMD: $cmdString\n";
                 system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
@@ -994,7 +994,7 @@ unless (-e "5.augustus.ok") {
                     $training_genes_number = $1 if m/Best gene Models number:\s+(\d+)/;
                 }
                 if ( $training_genes_number < 1000 ) {
-                    $cmdString = "$dirname/bin/geneModels2AugusutsTrainingInput --min_evalue 1e-9 --min_identity 0.9 --min_coverage_ratio 0.9 --min_cds_num 1 --min_cds_length 450 --min_cds_exon_ratio 0.40 --keep_ratio_for_excluding_too_long_gene 0.99 --out_prefix ati --cpu $cpu geneModels.gff3 $genome &> geneModels2AugusutsTrainingInput.log.Loose_thresholds";
+                    $cmdString = "$dirname/bin/geneModels2AugusutsTrainingInput --min_evalue 1e-9 --min_identity 0.9 --min_coverage_ratio 0.9 --min_cds_num 1 --min_cds_length 450 --min_cds_exon_ratio 0.40 --keep_ratio_for_excluding_too_long_gene 0.99 --out_prefix ati --cpu $cpu geneModels.gff3 $genome 1> geneModels2AugusutsTrainingInput.log.Loose_thresholds 2>&1";
                     print STDERR (localtime) . ": CMD: $cmdString\n";
                     system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
                 }
@@ -1034,7 +1034,7 @@ unless (-e "5.augustus.ok") {
             @flanking_length = sort {$a <=> $b} @flanking_length;
             $flanking_length = int($flanking_length[@flanking_length/2] / 8);
             $flanking_length = $gene_length[@gene_length/2] if $flanking_length >= $gene_length[@gene_length/2];
-            $cmdString = "$dirname/bin/BGM2AT $config{'BGM2AT'} --flanking_length $flanking_length --CPU $cpu --onlytrain_GFF3 ati.filter1.gff3 --stopAfterFirstEtraining ati.filter2.gff3 $genome $augustus_species &> BGM2AT.log";
+            $cmdString = "$dirname/bin/BGM2AT $config{'BGM2AT'} --flanking_length $flanking_length --CPU $cpu --onlytrain_GFF3 ati.filter1.gff3 --stopAfterFirstEtraining ati.filter2.gff3 $genome $augustus_species 1> BGM2AT.log 2>&1";
             unless (-e "firsttest.out") {
                 print STDERR (localtime) . ": CMD: $cmdString\n";
                 system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
@@ -1084,7 +1084,7 @@ unless (-e "5.augustus.ok") {
             print STDERR "The accuracy value of augustus training iteration is: $second_accuracy\n";
 
             if ($second_accuracy > $first_accuracy) {
-                $cmdString = "$dirname/bin/BGM2AT $config{'BGM2AT'} --flanking_length $flanking_length --CPU $cpu --onlytrain_GFF3 ati.filter1.gff3 ati.filter2.gff3 $genome $augustus_species &>> BGM2AT.log";
+                $cmdString = "$dirname/bin/BGM2AT $config{'BGM2AT'} --flanking_length $flanking_length --CPU $cpu --onlytrain_GFF3 ati.filter1.gff3 ati.filter2.gff3 $genome $augustus_species 1> BGM2AT.log 2>&1";
                 print STDERR (localtime) . ": CMD: $cmdString\n";
                 system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
 
@@ -1197,7 +1197,7 @@ unless (-e "6.combineGeneModels.ok") {
     chdir "6.combineGeneModels";
     $pwd = `pwd`; print STDERR "PWD: $pwd";
 
-    $cmdString = "$dirname/bin/paraCombineGeneModels $config{'paraCombineGeneModels'} --cpu $cpu ../5.augustus/augustus.gff3 ../3.transcript/transfrag.genome.gff3 ../4.homolog/genewise.gff3 ../5.augustus/hints.gff &> /dev/null";
+    $cmdString = "$dirname/bin/paraCombineGeneModels $config{'paraCombineGeneModels'} --cpu $cpu ../5.augustus/augustus.gff3 ../3.transcript/transfrag.genome.gff3 ../4.homolog/genewise.gff3 ../5.augustus/hints.gff 1> /dev/null 2>&1";
     unless (-e "paraCombineGeneModels.ok") {
         print STDERR (localtime) . ": CMD: $cmdString\n";
         system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
@@ -1383,7 +1383,7 @@ $cmdString = "$dirname/bin/gff3ToGtf.pl $genome $out_prefix.GeneModels.gff3 > $o
 print STDERR (localtime) . ": CMD: $cmdString\n";
 system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
 
-$cmdString = "$dirname/bin/eukaryotic_gene_model_statistics.pl $out_prefix.GeneModels.gtf $genome $out_prefix &> $out_prefix.GeneModels.stats";
+$cmdString = "$dirname/bin/eukaryotic_gene_model_statistics.pl $out_prefix.GeneModels.gtf $genome $out_prefix 1> $out_prefix.GeneModels.stats 2>&1";
 print STDERR (localtime) . ": CMD: $cmdString\n";
 system("$cmdString") == 0 or die "failed to execute: $cmdString\n";
 
