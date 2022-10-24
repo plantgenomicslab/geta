@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/opt/miniconda3/bin/perl
 use strict;
 use Getopt::Long;
 
