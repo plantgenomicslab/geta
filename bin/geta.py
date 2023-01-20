@@ -61,11 +61,11 @@ print("PWD:", pwd)
 # Get current date and time
 print(datetime.datetime.now(), ": CMD:", " ".join(sys.argv))
 
-genome = abs_path(genome)
+genome = os.path.abspath(genome)
 if not genome:
     raise ValueError("No genome fasta input")
 
-protein = abs_path(protein)
+protein = os.path.abspath(protein)
 if not ((pe1 and pe2) or single_end or protein):
     raise ValueError("No RNA-Seq short reads or homologous proteins as input")
 
@@ -81,10 +81,10 @@ if use_existed_augustus_species:
         augustus_species = use_existed_augustus_species
 
 if RM_lib:
-    RM_lib = abs_path(RM_lib)
+    RM_lib = os.path.abspath(RM_lib)
 
 if config:
-    config = abs_path(config)
+    config = os.path.abspath(config)
 
 pe_reads = {}
 se_reads = {}
@@ -95,15 +95,15 @@ if pe1 and pe2:
     if len(pe1) != len(pe2):
         raise ValueError("the input file number of -1 was not equal to -2.")
     for i in range(len(pe1)):
-        pe1[i] = abs_path(pe1[i])
-        pe2[i] = abs_path(pe2[i])
+        pe1[i] = os.path.abspath(pe1[i])
+        pe2[i] = os.path.abspath(pe2[i])
         pe_file = pe1[i] + "\t" + pe2[i]
         pe_reads[pe_file] = 1
 
 if single_end:
     se = single_end.split(",")
     for i in range(len(se)):
-        se[i] = abs_path(se[i])
+        se[i] = os.path.abspath(se[i])
         se_reads[se[i]] = 1
    
 out_prefix = out_prefix or "out"
@@ -112,7 +112,7 @@ cpu = cpu or 4
 HMM_db = {}
 if HMM_db:
     for db in HMM_db.split(","):
-        db = abs_path(db)
+        db = os.path.abspath(db)
         HMM_db[db] = os.path.basename(db)
 
 BLASTP_db = {}
