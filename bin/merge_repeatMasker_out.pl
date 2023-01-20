@@ -9,13 +9,18 @@ Usage:
     --min_coverge_ratio <float>    default: 0.25
     设置最小覆盖率阈值。若匹配区域对目标重复序列的覆盖率低于此阈值，则过滤掉此结果。
 
+    --out_prefix <string>    default: genome.repeat
+    设置输出文件前缀。程序默认生成genome.repeat.out和genome.repeat.gff3两个结果文件。
+
 USAGE
 if (@ARGV==0){die $usage}
-my $min_coverge_ratio;
+my ($min_coverge_ratio, $out_prefix);
 GetOptions(
     "min_coverge_ratio:f" => \$min_coverge_ratio,
+    "out_prefix:s" => \$out_prefix,
 );
 $min_coverge_ratio ||= 0.25;
+$out_prefix ||= "genome.repeat";
 
 my $genome_file = shift @ARGV;
 my $genome_size;
@@ -27,8 +32,8 @@ while (<IN>) {
 close IN;
 
 my (%locus, %scaffold, @scaffold);
-open OUT, '>', "genome.repeat.out" or die $!;
-open GFF3, '>', "genome.repeat.gff3" or die $!;
+open OUT, '>', "$out_prefix.out" or die $!;
+open GFF3, '>', "$out_prefix.gff3" or die $!;
 print GFF3 "##gff-version 3\n";
 
 foreach (@ARGV) {
@@ -48,6 +53,7 @@ foreach (@ARGV) {
             $ratio = ($aaa[13] - $aaa[12] + 1) / ($aaa[13] + $1) if ($aaa[13] + $1) != 0;
         }
         next if $ratio < $min_coverge_ratio;
+        $ratio = sprintf("%.4f", $ratio);
 
         $locus{$aaa[5]}{"$aaa[6]\t$aaa[7]"}{"description"} = $_;
         $locus{$aaa[5]}{"$aaa[6]\t$aaa[7]"}{"start"} = $aaa[6];
@@ -55,6 +61,7 @@ foreach (@ARGV) {
         $locus{$aaa[5]}{"$aaa[6]\t$aaa[7]"}{"name"} = $aaa[10];
         $locus{$aaa[5]}{"$aaa[6]\t$aaa[7]"}{"repeatClass"}  = $aaa[11];
         $locus{$aaa[5]}{"$aaa[6]\t$aaa[7]"}{"target"} = "$aaa[12]\t$aaa[13]\t$aaa[14]";
+        $locus{$aaa[5]}{"$aaa[6]\t$aaa[7]"}{"ratio"} = $ratio;
 
         push @scaffold, $aaa[5] unless exists $scaffold{$aaa[5]};
         $scaffold{$aaa[5]} = 1;
@@ -76,7 +83,8 @@ foreach my $scaffold (@scaffold) {
         my $target = &target($locus{$scaffold}{$locus}{"name"}, $locus{$scaffold}{$locus}{"target"});
         my $strand = '+';
         $strand = '-' if $locus{$scaffold}{$locus}{"strand"} eq 'C';
-        print GFF3 "$scaffold\tRepeatMasker\tsimilarity\t$start_end[0]\t$start_end[1]\t\.\t$strand\t\.\tName=$name;Target=$target;\n";
+        my $Ratio = $locus{$scaffold}{$locus}{"ratio"};
+        print GFF3 "$scaffold\tRepeatMasker\tsimilarity\t$start_end[0]\t$start_end[1]\t\.\t$strand\t\.\tName=$name;Target=$target;Ratio=$Ratio\n";
 
         $total_repeat{"num"} ++;
         $total_repeat{"regions"}{"$scaffold\t$start_end[0]\t$start_end[1]"} = 1;
@@ -115,7 +123,7 @@ foreach my $scaffold (@scaffold) {
 my @repeatRegion = keys %{$total_repeat{"regions"}};
 my $total_repeat_num = $total_repeat{"num"};
 my $total_repeat_size = &collect_length(@repeatRegion);
-print STDERR "Result files:\n\tgenome.repeat.out, genome.repeat.gff3.\n";
+print STDERR "Result files:\n\t$out_prefix.out, $out_prefix.gff3.\n";
 my $total_repeat_ratio = int($total_repeat_size / $genome_size * 10000) / 100;
 print "=======================================================\n";
 printf "Genome Size: $genome_size bp\nRepeat Size: $total_repeat_size bp\nRepeat Ratio: %.2f\%\n", $total_repeat_ratio;
