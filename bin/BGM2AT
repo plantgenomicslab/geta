@@ -229,7 +229,7 @@ print STDERR "CMD: $cmdString\n";
 $cmdString = "cat genes.gb.train.test genes.only_train.gb > training.gb.onlytrain";
 print STDERR "CMD: $cmdString\n";
 (system $cmdString) == 0 or die "Failed to execute: $cmdString\n";
-$cmdString = "optimize_augustus.pl --species=$ARGV[2] --rounds=$optimize_augustus_rounds --cpus=$cpus --kfold=$cpus --onlytrain=training.gb.onlytrain genes.gb.train.train > optimize.out";
+$cmdString = "perl ~/pgl_scratch/miniconda3/envs/GA_pipeline/pkgs/augustus-3.1-0/scripts/optimize_augustus.pl --species=$ARGV[2] --rounds=$optimize_augustus_rounds --cpus=$cpus --kfold=$cpus --onlytrain=training.gb.onlytrain genes.gb.train.train > optimize.out";
 unless (-e "optimize_augustus.ok") {
     print STDERR "CMD: $cmdString\n";
     (system $cmdString) == 0 or die "Failed to execute: $cmdString\n";
