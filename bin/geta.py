@@ -61,8 +61,89 @@ print("PWD:", pwd)
 # Get current date and time
 print(datetime.datetime.now(), ": CMD:", " ".join(sys.argv))
 
+genome = abs_path(genome)
+if not genome:
+    raise ValueError("No genome fasta input")
+
+protein = abs_path(protein)
+if not ((pe1 and pe2) or single_end or protein):
+    raise ValueError("No RNA-Seq short reads or homologous proteins as input")
+
+if not (augustus_species or use_existed_augustus_species):
+    raise ValueError("No Augustus species provided")
+
+if use_existed_augustus_species:
+    species_config_dir = os.environ["AUGUSTUS_CONFIG_PATH"]
+    species_config_dir = os.path.join(species_config_dir, "species", use_existed_augustus_species)
+    if not os.path.exists(species_config_dir):
+        raise ValueError("The AUGUSUTS HMM files of {} does not exists!".format(use_existed_augustus_species))
+    else:
+        augustus_species = use_existed_augustus_species
+
+if RM_lib:
+    RM_lib = abs_path(RM_lib)
+
+if config:
+    config = abs_path(config)
+
+pe_reads = {}
+se_reads = {}
+
+if pe1 and pe2:
+    pe1 = pe1.split(",")
+    pe2 = pe2.split(",")
+    if len(pe1) != len(pe2):
+        raise ValueError("the input file number of -1 was not equal to -2.")
+    for i in range(len(pe1)):
+        pe1[i] = abs_path(pe1[i])
+        pe2[i] = abs_path(pe2[i])
+        pe_file = pe1[i] + "\t" + pe2[i]
+        pe_reads[pe_file] = 1
+
+if single_end:
+    se = single_end.split(",")
+    for i in range(len(se)):
+        se[i] = abs_path(se[i])
+        se_reads[se[i]] = 1
+   
+out_prefix = out_prefix or "out"
+cpu = cpu or 4
+
+HMM_db = {}
+if HMM_db:
+    for db in HMM_db.split(","):
+        db = abs_path(db)
+        HMM_db[db] = os.path.basename(db)
+
+BLASTP_db = {}
+if BLASTP_db:
+    for db in BLASTP_db.split(","):
+        BLASTP_db[db] = os.path.basename(db)
 
 
+config = {
+    'RepeatMasker': '-e ncbi -gff',
+    'trimmomatic': 'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 TOPHRED33',
+    'hisat2-build': '-p 1',
+    'hisat2': '--min-intronlen 20 --max-intronlen 20000 --dta --score-min L,0.0,-0.4',
+    'sam2transfrag': '--fraction 0.05 --min_expressed_base_depth 2 --max_expressed_base_depth 50 --min_junction_depth 2 --max_junction_depth 50 --min_fragment_count_per_transfrags 10 --min_intron_length 20',
+    'TransDecoder.LongOrfs': '-m 100 -G universal',
+    'TransDecoder.Predict': '--retain_long_orfs_mode dynamic',
+    'homolog_genewise': '--coverage_ratio 0.4 --evalue 1e-9',
+    'homolog_genewiseGFF2GFF3': '--min_score 15 --gene_prefix genewise --filterMiddleStopCodon',
+    'geneModels2AugusutsTrainingInput': '--min_evalue 1e-9 --min_identity 0.8 --min_coverage_ratio 0.8 --min_cds_num 2 --min_cds_length 450 --min_cds_exon_ratio 0.60',
+    'BGM2AT': '--min_gene_number_for_augustus_training 500 --gene_number_for_accuracy_detection 200 --min_gene_number_of_optimize_augustus_chunk 50 --max_gene_number_of_optimize_augustus_chunk 200',
+    'prepareAugusutusHints': '--margin 20',
+    'paraAugusutusWithHints': '--gene_prefix augustus --min_intron_len 20',
+    'paraCombineGeneModels': '--overlap 30 --min_augustus_transcriptSupport_percentage 10.0 --min_augustus_intronSupport_number 1 --min_augustus_intronSupport_ratio 0.01',
+    'pickout_better_geneModels_from_evidence': '--overlap_ratio 0.2 --ratio1 2 --ratio2 1.5 --ratio3 0.85 --ratio4 0.85',
+    'fillingEndsOfGeneModels': '--start_codon ATG --stop_codon TAG,TGA,TAA',
+    'alternative_splicing_analysis': '--min_intron_depth 1 --min_base_depth_ratio_for_ref_specific_intron 0.3 --min_intron_depth_ratio_for_evidence_specific_intron 0.2 --min_base_depth_ratio_for_common_intron 0.2 --min_gene_depth 10 --min_transcript_confidence_for_output 0.05 --transcript_num_for_output_when_all_low_confidence 8 --added_mRNA_ID_prefix t',
+    'GFF3_extract_TranscriptID_for_filtering': '--min_CDS_ratio 0.3 --min_CDS_length 600 --max_repeat_overlap_ratio 0.3 --ignore_repeat_Name Simple_repeat,Low_complexity,Satellite,Unknown,Tandem_repeat',
+    'para_hmmscan': '--evalue1 1e-5 --evalue2 1e-3 --hmm_length 80 --coverage 0.25 --no_cut_ga --chunk 20 --hmmscan_cpu 2',
+    'diamond': '--sensitive --max-target-seqs 20 --evalue 1e-5 --id 10 --index-chunks 1 --block-size 5',
+    'parsing_blast_result.pl': '--evalue 1e-9 --identity 0.8 --coverage 0.8 --min_length 200 --min_cds_num 2 --min_cds_length 450 --min_cds_exon_ratio 0.60'
+}
 
 
 
