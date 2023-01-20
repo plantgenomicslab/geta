@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/opt/miniconda3/bin/perl
 use strict;
 use File::Basename;
 use Cwd 'abs_path';
@@ -19,9 +19,9 @@ while (<IN>) {
 	chomp;
 	my $prot_db = $_ =~ s/homolog_protein.split\///gr;
 	my $aln_tmp = $prot_db."_tmpDir";
-	my $aln_db = $prot_db."_aln";
+	my $aln_db = $prmt_db."_aln";
 	my $outfile = $prot_db.".out";
-	push @command, "mmseqs search $prot_db genome $aln_db $aln_tmp -e $evalue --threads $threads --start-sens 1 -s 8.5 -a --comp-bias-corr 0 --max-seqs 20 --mask 0 --orf-start-mode 1  --alignment-mode 3 && mmseqs convertalis $prot_db genome $aln_db $outfile\n";
+	push @command, "mmseqs search $prot_db genome $aln_db $aln_tmp -e $evalue --threads $threads --start-sens 1 -s 8.5 -a --comp-bias-corr 0 --max-seqs 20 --mask 0 --orf-start-mode 1  --alignment-mode 3 && mmseqs convertalis $prot_db genome $aln_db $outfile --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tframe'\n";
 	push @outs, $outfile;
 }
 close IN;
