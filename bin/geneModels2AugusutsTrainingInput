@@ -4,6 +4,9 @@ use Getopt::Long;
 use File::Basename;
 use Cwd 'abs_path';
 
+my $dirname = dirname($0);
+$dirname =~ s/\/bin$//;
+
 my $usage = <<USAGE;
 Usage:
     $0 [options] geneModels.gff3 genome.fasta
