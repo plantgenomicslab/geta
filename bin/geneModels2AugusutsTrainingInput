@@ -155,7 +155,7 @@ else {
     print STDERR "Skip CMD: $cmdString, for file $out_prefix.diamond_makedb.ok exists\n\n";
 }
 
-$cmdString = "diamond blastp --sensitive --max-target-seqs 20 --evalue 1e-5 --id 10 --index-chunks 1 --block-size 5 --outfmt 5 --db $out_prefix --query $out_prefix.proteins.fasta --out $out_prefix.dimaond_out.xml --threads $cpu";
+$cmdString = "diamond blastp --sensitive --max-target-seqs 20 --evalue 1e-5 --id 10 --index-chunks 1 --block-size 5 --outfmt 5 --db ${out_prefix}.dmnd --query $out_prefix.proteins.fasta --out $out_prefix.dimaond_out.xml --threads $cpu";
 unless (-e "$out_prefix.blastp.ok") {
     print STDERR (localtime) . " CMD: $cmdString\n";
     system ($cmdString) == 0 or die "Failed to execute: $cmdString $!\n";
