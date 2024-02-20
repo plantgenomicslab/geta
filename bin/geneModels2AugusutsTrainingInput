@@ -145,11 +145,11 @@ foreach my $gene_id (sort keys %gff) {
 close OUT;
 
 # 对proteins序列进行BLAST分析
-my $cmdString = "diamond makedb --db $out_prefix --in $out_prefix.proteins.fasta &> $out_prefix.diamond_makedb.log";
+my $cmdString = "diamond makedb --db $out_prefix --in $out_prefix.proteins.fasta";
 unless (-e "$out_prefix.diamond_makedb.ok") {
     print STDERR (localtime) . " CMD: $cmdString\n";
     system ($cmdString) == 0 or die "Failed to execute: $cmdString $!\n";
-    open OUT, ">", "$out_prefix.diamond_makedb.ok"; close OUT;
+    #open OUT, ">", "$out_prefix.diamond_makedb.ok"; close OUT;
 }
 else {
     print STDERR "Skip CMD: $cmdString, for file $out_prefix.diamond_makedb.ok exists\n\n";
@@ -159,7 +159,7 @@ $cmdString = "diamond blastp --sensitive --max-target-seqs 20 --evalue 1e-5 --id
 unless (-e "$out_prefix.blastp.ok") {
     print STDERR (localtime) . " CMD: $cmdString\n";
     system ($cmdString) == 0 or die "Failed to execute: $cmdString $!\n";
-    open OUT, ">", "$out_prefix.blastp.ok" unless -e "FailedCommands"; close OUT;
+    #open OUT, ">", "$out_prefix.blastp.ok" unless -e "FailedCommands"; close OUT;
 }
 else {
     print STDERR "Skip CMD: $cmdString, for file $out_prefix.blastp.ok exists\n\n";
@@ -169,7 +169,7 @@ $cmdString = "$dirname/bin/parsing_blast_result.pl --CIP $min_identity --evalue 
 unless (-e "$out_prefix.parsing_blast_result.ok") {
     print STDERR (localtime) . " CMD: $cmdString\n";
     system ($cmdString) == 0 or die "Failed to execute: $cmdString $!\n";
-    open OUT, ">", "$out_prefix.parsing_blast_result.ok" unless -e "FailedCommands"; close OUT;
+    #open OUT, ">", "$out_prefix.parsing_blast_result.ok" unless -e "FailedCommands"; close OUT;
 }
 else {
     print STDERR "Skip CMD: $cmdString, for file $out_prefix.parsing_blast_result.ok exists\n\n";
